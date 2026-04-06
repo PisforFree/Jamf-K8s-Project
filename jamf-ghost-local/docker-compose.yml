@@ -1,0 +1,34 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: jamf-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ghostdb
+      MYSQL_USER: ghostuser
+      MYSQL_PASSWORD: ghostpassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  ghost:
+    image: ghost:5-alpine
+    container_name: jamf-ghost
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - "2368:2368"
+    environment:
+      database__client: mysql
+      database__connection__host: mysql
+      database__connection__user: ghostuser
+      database__connection__password: ghostpassword
+      database__connection__database: ghostdb
+      url: http://localhost:2368
+    volumes:
+      - ghost_data:/var/lib/ghost/content
+
+volumes:
+  mysql_data:
+  ghost_data:
